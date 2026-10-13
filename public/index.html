@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Job Apply Hub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Signed-out view -->
+<main id="auth" class="auth" hidden>
+  <section class="auth-card">
+    <h1>Job Apply Hub</h1>
+    <p class="muted">Your resume, your target companies and every application in one place.</p>
+
+    <a id="linkedin-btn" class="btn linkedin" href="/auth/linkedin">Continue with LinkedIn</a>
+    <p id="linkedin-hint" class="hint" hidden>LinkedIn sign-in needs keys in <code>.env</code> first. See <code>.env.example</code>.</p>
+
+    <div class="divider"><span>or use email</span></div>
+
+    <div class="tabs small" role="tablist">
+      <button type="button" class="tab active" data-auth="login">Sign in</button>
+      <button type="button" class="tab" data-auth="register">Create account</button>
+    </div>
+
+    <form id="auth-form">
+      <label id="name-field" hidden>Full name
+        <input name="name" autocomplete="name">
+      </label>
+      <label>Email
+        <input name="email" type="email" autocomplete="email" required>
+      </label>
+      <label>Password
+        <input name="password" type="password" minlength="8" autocomplete="current-password" required>
+      </label>
+      <p id="auth-error" class="error" role="alert" hidden></p>
+      <button class="btn primary" id="auth-submit">Sign in</button>
+    </form>
+  </section>
+</main>
+
+<!-- Signed-in view -->
+<div id="app" hidden>
+  <header class="topbar">
+    <strong class="brand">Job Apply Hub</strong>
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab active" data-view="companies">Companies</button>
+      <button type="button" class="tab" data-view="profile">Profile &amp; resume</button>
+      <button type="button" class="tab" data-view="import">Import</button>
+      <button type="button" class="tab" data-view="automation">Automation</button>
+    </nav>
+    <div class="who">
+      <span id="who-name"></span>
+      <button type="button" class="btn ghost" id="logout">Sign out</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Companies -->
+    <section id="view-companies" class="view">
+      <div id="stats" class="stats"></div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search company, location, role" aria-label="Search companies">
+        <select id="filter-status" aria-label="Filter by status"></select>
+        <select id="filter-size" aria-label="Filter by size"></select>
+        <button type="button" class="btn primary" id="add-company">Add company</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Company</th><th>Size</th><th>Location</th><th>Links</th><th>Status</th><th>Role / notes</th><th></th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div id="empty" class="empty" hidden>
+          <p>No companies yet.</p>
+          <button type="button" class="btn primary" data-goto="import">Import your list</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile -->
+    <section id="view-profile" class="view" hidden>
+      <div class="grid2">
+        <form id="profile-form" class="card">
+          <h2>Application details</h2>
+          <p class="muted">Used to fill application forms. Keep it accurate.</p>
+          <div class="fields">
+            <label>Full name <input name="fullName" autocomplete="name"></label>
+            <label>Email <input name="email" type="email" autocomplete="email"></label>
+            <label>Phone <input name="phone" autocomplete="tel"></label>
+            <label>City <input name="city"></label>
+            <label class="wide">Target roles <input name="targetRoles" placeholder="e.g. Full Stack Developer, AI Engineer"></label>
+            <label>Years of experience <input name="experienceYears"></label>
+            <label>Work mode
+              <select name="workMode">
+                <option value="">Any</option><option>On-site</option><option>Hybrid</option><option>Remote</option>
+              </select>
+            </label>
+            <label>Expected salary <input name="expectedSalary"></label>
+            <label>Notice period <input name="noticePeriod"></label>
+            <label>LinkedIn profile URL <input name="linkedinUrl" type="url"></label>
+            <label>Portfolio URL <input name="portfolioUrl" type="url"></label>
+            <label class="wide">GitHub URL <input name="githubUrl" type="url"></label>
+            <label class="wide">Cover note <textarea name="coverNote" rows="6" placeholder="A short note that can be adapted for each company"></textarea></label>
+          </div>
+          <button class="btn primary">Save details</button>
+        </form>
+
+        <div class="stack">
+          <div class="card">
+            <h2>Resume</h2>
+            <p id="resume-status" class="muted"></p>
+            <form id="resume-form" class="row">
+              <input type="file" name="resume" accept=".pdf,.doc,.docx" required aria-label="Resume file">
+              <button class="btn primary">Upload</button>
+            </form>
+            <div class="row">
+              <a id="resume-view" class="btn ghost" href="/api/resume" hidden>Download</a>
+              <button type="button" id="resume-remove" class="btn ghost danger" hidden>Remove</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>LinkedIn</h2>
+            <p id="linkedin-status" class="muted"></p>
+            <a id="linkedin-link" class="btn linkedin" href="/auth/linkedin">Connect LinkedIn</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Import -->
+    <section id="view-import" class="view" hidden>
+      <div class="grid3">
+        <form id="import-file" class="card">
+          <h2>Upload a spreadsheet</h2>
+          <p class="muted">Excel (.xlsx, .xls) or CSV. Columns such as Name, Size, Location, Website and LinkedIn are detected automatically.</p>
+          <input type="file" name="file" accept=".xlsx,.xls,.csv" required aria-label="Spreadsheet file">
+          <button class="btn primary">Import file</button>
+        </form>
+        <form id="import-sheet" class="card">
+          <h2>Google Sheets link</h2>
+          <p class="muted">The sheet must be shared as "Anyone with the link".</p>
+          <input name="url" type="url" required aria-label="Google Sheets link"
+            value="https://docs.google.com/spreadsheets/d/1M4q15J8t-NiEOgW8Ku9NATUtoQqBZ_BnQX-tDQuW8sc/edit?gid=0#gid=0">
+          <button class="btn primary">Import sheet</button>
+        </form>
+        <form id="import-sample" class="card">
+          <h2>Software Companies (ISB)</h2>
+          <p class="muted">A saved copy of your Islamabad sheet: 55 companies with websites and LinkedIn pages.</p>
+          <button class="btn primary">Load 55 companies</button>
+        </form>
+      </div>
+      <p class="muted">Companies already in your list are skipped, so importing twice is safe.</p>
+    </section>
+
+    <!-- Automation -->
+    <section id="view-automation" class="view" hidden>
+      <div class="grid2">
+        <div class="card">
+          <h2>Applying with Claude in Chrome</h2>
+          <ol class="steps">
+            <li>Fill in <strong>Profile &amp; resume</strong> and import your companies.</li>
+            <li>Install the Claude in Chrome extension and stay signed in to LinkedIn in that Chrome window.</li>
+            <li>Paste the prompt below into Claude Code.</li>
+            <li>Claude opens each company's careers page, finds roles that match, fills the form and marks the row <em>Ready for review</em>.</li>
+            <li>You check each one and approve the submit. Rows that need an account or a CAPTCHA are marked <em>Needs you</em>.</li>
+          </ol>
+          <label>Prompt
+            <textarea id="prompt" rows="9" readonly></textarea>
+          </label>
+          <button type="button" class="btn primary" data-copy="prompt">Copy prompt</button>
+        </div>
+        <div class="card">
+          <h2>Access for Claude</h2>
+          <p class="muted">Lets Claude read your queue and update statuses. Keep it private.</p>
+          <label>API token <input id="token" readonly></label>
+          <div class="row">
+            <button type="button" class="btn ghost" data-copy="token">Copy</button>
+            <button type="button" class="btn ghost" id="rotate">Replace token</button>
+          </div>
+          <label>Resume file on this computer <input id="resume-path" readonly></label>
+          <h3>Endpoints</h3>
+          <pre id="endpoints"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Add / edit company -->
+<dialog id="company-dialog">
+  <form id="company-form" method="dialog">
+    <h2 id="dialog-title">Add company</h2>
+    <div class="fields">
+      <label class="wide">Company name <input name="name" required></label>
+      <label>Type <input name="type" placeholder="Services-Based"></label>
+      <label>Size <input name="size"></label>
+      <label>Location <input name="location"></label>
+      <label>Status <select name="status"></select></label>
+      <label class="wide">Website <input name="website" placeholder="https://"></label>
+      <label class="wide">LinkedIn page <input name="linkedin" placeholder="https://"></label>
+      <label class="wide">Careers / job post URL <input name="careersUrl" placeholder="https://"></label>
+      <label class="wide">Role applied for <input name="role"></label>
+      <label class="wide">Notes <textarea name="notes" rows="4"></textarea></label>
+    </div>
+    <p id="dialog-error" class="error" role="alert" hidden></p>
+    <div class="row end">
+      <button type="button" class="btn ghost danger" id="dialog-delete" hidden>Delete</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" id="dialog-cancel">Cancel</button>
+      <button class="btn primary" value="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
