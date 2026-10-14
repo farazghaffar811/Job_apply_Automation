@@ -65,6 +65,8 @@ function showAuth() {
   $('#auth').hidden = false;
   $('#linkedin-btn').classList.toggle('disabled', !state.config.linkedin);
   $('#linkedin-hint').hidden = state.config.linkedin;
+  $('#storage-error').textContent = state.config.storageError || '';
+  $('#storage-error').hidden = !state.config.storageError;
 }
 
 function setAuthMode(mode) {
@@ -134,7 +136,7 @@ function renderUser() {
 
   $('#resume-status').textContent = u.resume
     ? `${u.resume.name}, uploaded ${new Date(u.resume.uploadedAt).toLocaleDateString()}`
-    : 'No resume uploaded yet. PDF, DOC or DOCX, up to 8 MB.';
+    : `No resume uploaded yet. PDF, DOC or DOCX, up to ${state.config.maxUploadMb || 4} MB.`;
   $('#resume-view').hidden = !u.resume;
   $('#resume-remove').hidden = !u.resume;
 
@@ -148,7 +150,7 @@ function renderUser() {
       : 'Add your LinkedIn app keys to .env to turn this on (see .env.example).';
 
   $('#token').value = u.apiToken;
-  $('#resume-path').value = u.resume ? u.resume.path : 'Upload a resume first';
+  $('#resume-path').value = !u.resume ? 'Upload a resume first' : u.resume.path || `${location.origin}/api/resume (download with the token)`;
   $('#endpoints').textContent = [
     'Header:  Authorization: Bearer <token>',
     '',

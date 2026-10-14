@@ -13,6 +13,7 @@
   <section class="auth-card">
     <h1>Job Apply Hub</h1>
     <p class="muted">Your resume, your target companies and every application in one place.</p>
+    <p id="storage-error" class="error" role="alert" hidden></p>
 
     <a id="linkedin-btn" class="btn linkedin" href="/auth/linkedin">Continue with LinkedIn</a>
     <p id="linkedin-hint" class="hint" hidden>LinkedIn sign-in needs keys in <code>.env</code> first. See <code>.env.example</code>.</p>
@@ -180,7 +181,7 @@
             <button type="button" class="btn ghost" data-copy="token">Copy</button>
             <button type="button" class="btn ghost" id="rotate">Replace token</button>
           </div>
-          <label>Resume file on this computer <input id="resume-path" readonly></label>
+          <label>Resume file <input id="resume-path" readonly></label>
           <h3>Endpoints</h3>
           <pre id="endpoints"></pre>
         </div>
